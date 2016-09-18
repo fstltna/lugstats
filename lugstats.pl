@@ -106,7 +106,8 @@ if ($NumUsers > $MAX_USERS)
 
 print $fh "</table>
 <hr>
-Max Users: $MAX_USERS - $MAX_DATE
+Max Users: $MAX_USERS - $MAX_DATE<br>
+<font color=\"green\">* Game Operators</font>
 <hr>
 Version $REVVER - <b>Get This Utility At <a href=\"https://lugdunoncity.org/index.php/downloads-new/category/13-server\">Lugdunon City</a></b>
 </body>
