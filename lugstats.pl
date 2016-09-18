@@ -60,7 +60,8 @@ if (-f $MAX_FILE)
 ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 $year = substr($year, 1);
 #printf("Time Format - HH:MM:SS\n");
-$LAST_SEEN = sprintf("%02d/%02d/20%02d %02d:%02d:%02d", $mon, $mday, $year, $hour, $min, $sec);
+#$LAST_SEEN = sprintf("%02d/%02d/20%02d %02d:%02d:%02d", $mon, $mday, $year, $hour, $min, $sec); # ZZZ
+$LAST_SEEN = localtime();
 
 # Write out HTML
 my $message = <<"END_MESSAGE";
@@ -102,7 +103,7 @@ if ($response->{success})
     my $html = $response->{content};
     @LINES = split /\n/, $html;
     chomp(@LINES);
-    #print("Lines: '@LINES'\n"); # ZZZ
+    #print("Lines: '@LINES'\n");
     #($a, $b) = sscanf("'{\"players\":%s", @LINES);
     $decoded_json = decode_json($html);
     #print Dumper $decoded_json;
@@ -120,7 +121,7 @@ foreach (@{ $decoded_json->{players} })
     if ($_->{currentlyOnline} != 0)
     {
 	$user = $_->{name};
-	$time = scalar localtime($_->{lastPlayed});
+	$time = scalar localtime($_->{lastPlayed}/1000); # ZZZ
 	$timePlayed = sprintf("%02.2d minutes", $_->{timePlayed} / 60000);
 	$NumUsers += 1;
 	if ($usertype eq "admin")
