@@ -8,6 +8,7 @@ Project based here: https://lugdunoncity.org/index.php/downloads-new/category/13
 # Instructions:
 
 1) Edit lugstats.pl and make following changes:
+
     ```
     $SERVER_NAME="LugdunonCity";    # The name of your server
     $GAMELINK="http://client.lugdunon.net/?server=lugdunoncity.org:41977"; # Link to your live server
@@ -17,18 +18,20 @@ Project based here: https://lugdunoncity.org/index.php/downloads-new/category/13
     ```
 
 2) Execute the following commands:
+
     ```
-	cpan
-	install File::Copy
-	install HTTP::Tiny
-	install Data::Dumper
-	install LWP::Simple
-	install JSON
-	install String::Scanf
-	quit
+    cpan
+    install File::Copy
+    install HTTP::Tiny
+    install Data::Dumper
+    install LWP::Simple
+    install JSON
+    install String::Scanf
+    quit
     ```
 
 3) Create a crontab like this:
+
    ```
 	*/5 * * * * cd ~/lugstats;./lugstats.pl
    ```
