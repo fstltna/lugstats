@@ -7,6 +7,7 @@ $SERVER_NAME="LugdunonCity";	# The name of your server
 $GAMELINK="http://client.lugdunon.net/?server=lugdunoncity.org:41977"; # Link to your live server
 $OUTDIR="/var/www/lugstats";	# The file path to your web root
 $WEBDIR="/lugstats/";		# The absolute web directory of the above
+$SERVER_ADDR="http://lugdunoncity.org/sample.html";
 
 # Probobly don't change below here
 $LOGO="logoSmall.png";
@@ -15,6 +16,8 @@ $MAX_FILE="maxfile.txt";
 
 # Load our dependancies
 use File::Copy qw(copy);
+use HTTP::Tiny;
+use Data::Dumper qw(Dumper);
 
 # Code below here
 if (-e $OUTDIR and -d $OUTDIR)
@@ -83,17 +86,40 @@ Last Scanned: $LAST_SEEN
 <tr><td colspan = 2><center><h1><a href="$GAMELINK">$SERVER_NAME Server Stats</a></h1></center></td></tr>
 <tr><td><b>User Name</b></td><td><b>Connect Time</b></td></tr>
 END_MESSAGE
+
+# Pull in server data
+my $response = HTTP::Tiny->new->get($SERVER_ADDR);
+if ($response->{success})
+{
+    my $html = $response->{content};
+    @LINES = split /\n/, $html;
+    chomp(@LINES);
+}
+else
+{
+    print "Failed: $response->{status} $response->{reasons}";
+}
+
 open(my $fh, '>', "index.html") or die "Could not open file 'index.html' $!";
 print $fh $message;
 my $NumUsers = 0;
-@foo = ("User A", "User B", "User C", "User D", "User E");
-foreach $curline (@foo)
 {
+    for my $curline (@LINES)
+    {
 	$NumUsers += 1;
 	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 	$year = substr($year, 1);
 	$LAST_SEEN = sprintf("%02d/%02d/20%02d %02d:%02d:%02d", $mon, $mday, $year, $hour, $min, $sec);
-	print $fh "<tr><td width=250>$curline</td><td>$LAST_SEEN</td></tr>";
+	($user, $usertype, $time) = split /:/, $curline;
+	if ($usertype eq "admin")
+	{
+		print $fh "<tr><td width=250><font color=\"green\">*$user</font></td><td>$time</td></tr>";
+	}
+	else
+	{
+		print $fh "<tr><td width=250>$user</td><td>$time</td></tr>";
+	}
+    }
 }
 # Check for max users seen
 $MAXIT = 0;
