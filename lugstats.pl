@@ -120,8 +120,8 @@ foreach (@{ $decoded_json->{players} })
     if ($_->{currentlyOnline} != 0)
     {
 	$user = $_->{name};
-	$time = $_->{lastPlayed};
-	$timePlayed = $_->{timePlayed} / 600;
+	$time = scalar localtime($_->{lastPlayed});
+	$timePlayed = sprintf("%02.2d minutes", $_->{timePlayed} / 60000);
 	$NumUsers += 1;
 	if ($usertype eq "admin")
 	{
