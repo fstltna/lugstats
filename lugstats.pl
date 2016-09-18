@@ -7,7 +7,7 @@ $SERVER_NAME="LugdunonCity";	# The name of your server
 $GAMELINK="http://client.lugdunon.net/?server=lugdunoncity.org:41977"; # Link to your live server
 $OUTDIR="/var/www/lugstats";	# The file path to your web root
 $WEBDIR="/lugstats/";		# The absolute web directory of the above
-$SERVER_ADDR="http://lugdunoncity.org/sample.html";
+$SERVER_ADDR="http://lugdunoncity.org:41977/rest/net/lugdunon/players";
 
 # Probobly don't change below here
 $LOGO="logoSmall.png";
@@ -18,6 +18,10 @@ $MAX_FILE="maxfile.txt";
 use File::Copy qw(copy);
 use HTTP::Tiny;
 use Data::Dumper qw(Dumper);
+use LWP::Simple;
+use JSON qw( decode_json );
+use String::Scanf;
+#use REST::Client;
 
 # Code below here
 if (-e $OUTDIR and -d $OUTDIR)
@@ -88,12 +92,20 @@ Last Scanned: $LAST_SEEN
 END_MESSAGE
 
 # Pull in server data
+#my $client = REST::Client->new();
+#$client->GET($SERVER_ADDR);
+#print $client->responseContent();
+###
 my $response = HTTP::Tiny->new->get($SERVER_ADDR);
 if ($response->{success})
 {
     my $html = $response->{content};
     @LINES = split /\n/, $html;
     chomp(@LINES);
+    #print("Lines: '@LINES'\n"); # ZZZ
+    #($a, $b) = sscanf("'{\"players\":%s", @LINES);
+    $decoded_json = decode_json($html);
+    #print Dumper $decoded_json;
 }
 else
 {
@@ -103,14 +115,13 @@ else
 open(my $fh, '>', "index.html") or die "Could not open file 'index.html' $!";
 print $fh $message;
 my $NumUsers = 0;
+foreach (@{ $decoded_json->{players} })
 {
-    for my $curline (@LINES)
+    if ($_->{currentlyOnline} != 0)
     {
+	$user = $_->{name};
+	$time = $_->{lastPlayed};
 	$NumUsers += 1;
-	($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
-	$year = substr($year, 1);
-	$LAST_SEEN = sprintf("%02d/%02d/20%02d %02d:%02d:%02d", $mon, $mday, $year, $hour, $min, $sec);
-	($user, $usertype, $time) = split /:/, $curline;
 	if ($usertype eq "admin")
 	{
 		print $fh "<tr><td width=250><font color=\"green\">*$user</font></td><td>$time</td></tr>";
