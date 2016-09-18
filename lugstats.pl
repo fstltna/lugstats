@@ -4,14 +4,14 @@
 #
 # Change These Settings:
 $SERVER_NAME="LugdunonCity";	# The name of your server
-$GAMELINK="http://client.lugdunon.net/?server=lugdunoncity.org:41977"; # Link to your live server
+$GAMELINK="http://client.lugdunon.net/?server=lugdunoncity.org:41976"; # Link to your live server
 $OUTDIR="/var/www/lugstats";	# The file path to your web root
 $WEBDIR="/lugstats/";		# The absolute web directory of the above
-$SERVER_ADDR="http://lugdunoncity.org:41977/rest/net/lugdunon/players";
+$SERVER_ADDR="http://lugdunoncity.org:41976/rest/net/lugdunon/players";
 
 # Probobly don't change below here
 $LOGO="logoSmall.png";
-$REVVER="1.0";
+$REVVER="1.0.1";
 $MAX_FILE="maxfile.txt";
 
 # Load our dependancies
@@ -87,8 +87,8 @@ body {
 <img src="$WEBDIR$LOGO"><br>
 Last Scanned: $LAST_SEEN
 <table border=1>
-<tr><td colspan = 2><center><h1><a href="$GAMELINK">$SERVER_NAME Server Stats</a></h1></center></td></tr>
-<tr><td><b>User Name</b></td><td><b>Connect Time</b></td></tr>
+<tr><td colspan = 3><center><h1><a href="$GAMELINK">$SERVER_NAME Server Stats</a></h1></center></td></tr>
+<tr><td><b>User Name</b></td><td><b>Connect Time</b></td><td><b>Time Played</b></td></tr>
 END_MESSAGE
 
 # Pull in server data
@@ -121,14 +121,15 @@ foreach (@{ $decoded_json->{players} })
     {
 	$user = $_->{name};
 	$time = $_->{lastPlayed};
+	$timePlayed = $_->{timePlayed} / 600;
 	$NumUsers += 1;
 	if ($usertype eq "admin")
 	{
-		print $fh "<tr><td width=250><font color=\"green\">*$user</font></td><td>$time</td></tr>";
+		print $fh "<tr><td width=250><font color=\"green\">*$user</font></td><td>$time</td><td>$timePlayed</td></tr>";
 	}
 	else
 	{
-		print $fh "<tr><td width=250>$user</td><td>$time</td></tr>";
+		print $fh "<tr><td width=250>$user</td><td>$time</td><td>$timePlayed</td></tr>";
 	}
     }
 }
@@ -146,7 +147,7 @@ print $fh "</table>
 Max Users: $MAX_USERS - $MAX_DATE<br>
 <font color=\"green\">* Game Operators</font>
 <hr>
-Version $REVVER - <b>Get This Utility At <a href=\"https://lugdunoncity.org/index.php/downloads-new/category/13-server\">Lugdunon City</a></b>
+Version $REVVER - Get This Utility At <a href=\"https://lugdunoncity.org/index.php/downloads-new/category/13-server\">Lugdunon City</a>
 </body>
 </html>";
 close $fh;
