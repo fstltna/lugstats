@@ -10,7 +10,7 @@ Project based here: https://lugdunoncity.org/index.php/downloads-new/category/13
 1) Edit lugstats.pl and make following changes:
 
     $SERVER_NAME="LugdunonCity";    # The name of your server
-    $GAMELINK="http://client.lugdunon.net/?server=lugdunoncity.org:41977"; # Link to your live server
+    $GAMELINK="http://client.lugdunon.net/?server=lugdunoncity.org:41976"; # Link to your live server
     $OUTDIR="/var/www/lugstats";    # The file path to your web root - may be /var/www/html/lugstats
     $WEBDIR="/lugstats/";           # The absolute web directory of the above
     $SERVER_ADDR="http://lugdunoncity.org:41976/rest/net/lugdunon/players"; # The REST interface for your server
