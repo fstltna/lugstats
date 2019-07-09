@@ -1,18 +1,23 @@
 #!/usr/bin/perl
+use strict;
+use warnings;
 
 # Creates stats from the active Lugdunon server
 #
 # Change These Settings:
-$SERVER_NAME="LugdunonCity";	# The name of your server
-$GAMELINK="http://client.lugdunon.net/?server=lugdunoncity.org:41976"; # Link to your live server
-$OUTDIR="/var/www/lugstats";	# The file path to your web root
-$WEBDIR="/lugstats/";		# The absolute web directory of the above
-$SERVER_ADDR="http://lugdunoncity.org:41976/rest/net/lugdunon/players";
+my $SERVER_NAME="Retrowiki";	# The name of your server
+my $GAMELINK="http://client.lugdunon.net/?server=retrowiki.lugdunoncity.org:41976"; # Link to your live server
+my $OUTDIR="/var/www/html/lugstats";	# The file path to your web root
+my $WEBDIR="/lugstats/";		# The absolute web directory of the above
+my $SERVER_ADDR="http://retrowiki.lugdunoncity.org:41976/rest/net/lugdunon/players";
+
+####################################
 
 # Probobly don't change below here
-$LOGO="logoSmall.png";
-$REVVER="1.0.1";
-$MAX_FILE="maxfile.txt";
+my $LOGO="logoSmall.png";
+my $REVVER="1.1";
+my $MAX_FILE="maxfile.txt";
+my $MySettings = "$ENV{'HOME'}/.aamcrc";
 
 # Load our dependancies
 use File::Copy qw(copy);
@@ -22,6 +27,69 @@ use LWP::Simple;
 use JSON qw( decode_json );
 use String::Scanf;
 #use REST::Client;
+
+# Check for config file
+if (-f $MySettings)
+{
+	# Read in settings
+	open (my $FH, "<", $MySettings) or die "Could not read default file '$MySettings' $!";
+	while (<$FH>)
+	{
+		chop();
+		my ($Command, $Setting) = split(/=/, $_);
+		if ($Command eq "fileeditor")
+		{
+			$FileEditor = $Setting;
+		}
+		if ($Command eq "initdname")
+		{
+			$InitDName = $Setting;
+		}
+		if ($Command eq "alienarenadir")
+		{
+			$ALIENARENADIR = $Setting;
+		}
+		if ($Command eq "backupcommand")
+		{
+			$BackupCommand = $Setting;
+		}
+		if ($Command eq "pagercommand")
+		{
+			$PagerCommand = $Setting;
+		}
+		if ($Command eq "mapslist")
+		{
+			$MapsLst = $Setting;
+		}
+		if ($Command eq "defaultcfg")
+		{
+			$DefaultCfg = $Setting;
+		}
+		if ($Command eq "motd")
+		{
+			$MOTD = $Setting;
+		}
+	}
+	close($FH);
+}
+else
+{
+	# Store defaults
+	open (my $FH, ">", $MySettings) or die "Could not create default file '$MySettings' $!";
+my $SERVER_NAME="Retrowiki";    # The name of your server
+my $GAMELINK="http://client.lugdunon.net/?server=retrowiki.lugdunoncity.org:41976"; # Link to your live server
+my $OUTDIR="/var/www/html/lugstats";    # The file path to your web root
+my $WEBDIR="/lugstats/";                # The absolute web directory of the above
+my $SERVER_ADDR="http://retrowiki.lugdunoncity.org:41976/rest/net/lugdunon/players";
+
+	print $FH "fileeditor=/bin/nano\n";
+	print $FH "server_name='$SERVER_NAME'\n";
+	print $FH "gamelink='$GAMELINK'";
+	print $FH "outdir=$OUTDIR\n";
+	print $FH "webdir=$WEBDIR\n";
+	print $FH "server_addr=$SERVER_ADDR\n";
+	close($FH);
+}
 
 # Code below here
 if (-e $OUTDIR and -d $OUTDIR)
