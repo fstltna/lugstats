@@ -2,22 +2,9 @@
 use strict;
 use warnings;
 
+#
 # Creates stats from the active Lugdunon server
 #
-# Change These Settings:
-my $SERVER_NAME="Retrowiki";	# The name of your server
-my $GAMELINK="http://client.lugdunon.net/?server=retrowiki.lugdunoncity.org:41976"; # Link to your live server
-my $OUTDIR="/var/www/html/lugstats";	# The file path to your web root
-my $WEBDIR="/lugstats/";		# The absolute web directory of the above
-my $SERVER_ADDR="http://retrowiki.lugdunoncity.org:41976/rest/net/lugdunon/players";
-
-####################################
-
-# Probobly don't change below here
-my $LOGO="logoSmall.png";
-my $REVVER="1.1";
-my $MAX_FILE="maxfile.txt";
-my $MySettings = "$ENV{'HOME'}/.aamcrc";
 
 # Load our dependancies
 use File::Copy qw(copy);
@@ -26,7 +13,19 @@ use Data::Dumper qw(Dumper);
 use LWP::Simple;
 use JSON qw( decode_json );
 use String::Scanf;
-#use REST::Client;
+
+my $LOGO="logoSmall.png";
+my $REVVER="2.0";
+my $MAX_FILE="maxfile.txt";
+my $MySettings = "$ENV{'HOME'}/.lugstatsrc";
+my $SERVER_NAME="Default Server Name";	# The name of your server
+my $GAMELINK="http://client.lugdunon.net/?server=newserver.lugdunoncity.org:41976"; # Link to your live server
+my $OUTDIR="/var/www/html/lugstats";	# The file path to your web root
+my $WEBDIR="/lugstats/";		# The absolute web directory of the above
+my $SERVER_ADDR="http://newserver.lugdunoncity.org:41976/rest/net/lugdunon/players";
+my $MAX_DATE = "";
+my $decoded_json = "";
+my $usertype="";
 
 # Check for config file
 if (-f $MySettings)
@@ -37,37 +36,25 @@ if (-f $MySettings)
 	{
 		chop();
 		my ($Command, $Setting) = split(/=/, $_);
-		if ($Command eq "fileeditor")
+		if ($Command eq "server_name")
 		{
-			$FileEditor = $Setting;
+			$SERVER_NAME = $Setting;
 		}
-		if ($Command eq "initdname")
+		if ($Command eq "gamelink")
 		{
-			$InitDName = $Setting;
+			$GAMELINK = $Setting;
 		}
-		if ($Command eq "alienarenadir")
+		if ($Command eq "outdir")
 		{
-			$ALIENARENADIR = $Setting;
+			$OUTDIR = $Setting;
 		}
-		if ($Command eq "backupcommand")
+		if ($Command eq "webdir")
 		{
-			$BackupCommand = $Setting;
+			$WEBDIR = $Setting;
 		}
-		if ($Command eq "pagercommand")
+		if ($Command eq "server_addr")
 		{
-			$PagerCommand = $Setting;
-		}
-		if ($Command eq "mapslist")
-		{
-			$MapsLst = $Setting;
-		}
-		if ($Command eq "defaultcfg")
-		{
-			$DefaultCfg = $Setting;
-		}
-		if ($Command eq "motd")
-		{
-			$MOTD = $Setting;
+			$SERVER_ADDR = $Setting;
 		}
 	}
 	close($FH);
@@ -76,19 +63,15 @@ else
 {
 	# Store defaults
 	open (my $FH, ">", $MySettings) or die "Could not create default file '$MySettings' $!";
-my $SERVER_NAME="Retrowiki";    # The name of your server
-my $GAMELINK="http://client.lugdunon.net/?server=retrowiki.lugdunoncity.org:41976"; # Link to your live server
-my $OUTDIR="/var/www/html/lugstats";    # The file path to your web root
-my $WEBDIR="/lugstats/";                # The absolute web directory of the above
-my $SERVER_ADDR="http://retrowiki.lugdunoncity.org:41976/rest/net/lugdunon/players";
 
-	print $FH "fileeditor=/bin/nano\n";
 	print $FH "server_name='$SERVER_NAME'\n";
-	print $FH "gamelink='$GAMELINK'";
+	print $FH "gamelink='$GAMELINK'\n";
 	print $FH "outdir=$OUTDIR\n";
 	print $FH "webdir=$WEBDIR\n";
 	print $FH "server_addr=$SERVER_ADDR\n";
 	close($FH);
+	print "Settings file created - please run the script again after editing the settings at '$MySettings'.\n";
+	exit 0;
 }
 
 # Code below here
@@ -105,9 +88,9 @@ else
 # Copy in logo
 copy $LOGO, $OUTDIR;
 
-$first_row = 1;
+my $first_row = 1;
 
-$MAX_USERS = 0;
+my $MAX_USERS = 0;
 if (-f $MAX_FILE)
 {
 	open(my $maxfh, '<', "$MAX_FILE") or die "Could not open file '$MAX_FILE' $!";
@@ -125,11 +108,9 @@ if (-f $MAX_FILE)
 	}
 	close($maxfh);
 }
-($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 $year = substr($year, 1);
-#printf("Time Format - HH:MM:SS\n");
-#$LAST_SEEN = sprintf("%02d/%02d/20%02d %02d:%02d:%02d", $mon, $mday, $year, $hour, $min, $sec); # ZZZ
-$LAST_SEEN = localtime();
+my $LAST_SEEN = localtime();
 
 # Write out HTML
 my $message = <<"END_MESSAGE";
@@ -169,7 +150,7 @@ my $response = HTTP::Tiny->new->get($SERVER_ADDR);
 if ($response->{success})
 {
     my $html = $response->{content};
-    @LINES = split /\n/, $html;
+    my @LINES = split /\n/, $html;
     chomp(@LINES);
     #print("Lines: '@LINES'\n");
     #($a, $b) = sscanf("'{\"players\":%s", @LINES);
@@ -188,9 +169,9 @@ foreach (@{ $decoded_json->{players} })
 {
     if ($_->{currentlyOnline} != 0)
     {
-	$user = $_->{name};
-	$time = scalar localtime($_->{lastPlayed}/1000); # ZZZ
-	$timePlayed = sprintf("%02.2d minutes", $_->{timePlayed} / 60000);
+	my $user = $_->{name};
+	my $time = scalar localtime($_->{lastPlayed}/1000); # ZZZ
+	my $timePlayed = sprintf("%02.2d minutes", $_->{timePlayed} / 60000);
 	$NumUsers += 1;
 	if ($usertype eq "admin")
 	{
@@ -203,7 +184,7 @@ foreach (@{ $decoded_json->{players} })
     }
 }
 # Check for max users seen
-$MAXIT = 0;
+my $MAXIT = 0;
 if ($NumUsers > $MAX_USERS)
 {
 	$MAX_USERS = $NumUsers;
