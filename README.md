@@ -1,33 +1,36 @@
-# Lugstats
-===================
+# Lugstats (2.0)
+
+
+***
 
 The server stats utility for Lugdunon. Creates a HTML file showing the users currently online and the maximum number of players at one time.
 
-Project based here: https://lugdunoncity.org/index.php/downloads-new/category/13-server
+Project based here: https://lugdunoncity.org/index.php/forum/lugstats
 
 # Instructions:
 
-1) Edit lugstats.pl and make following changes:
+1) Run "**lugstats.pl**" - This will create the default configuration file.
+2) Edit **~/.lugstatsrc** and make following changes:
 
-    $SERVER_NAME="LugdunonCity";    # The name of your server
-    $GAMELINK="http://client.lugdunon.net/?server=lugdunoncity.org:41976"; # Link to your live server
-    $OUTDIR="/var/www/lugstats";    # The file path to your web root - may be /var/www/html/lugstats
-    $WEBDIR="/lugstats/";           # The absolute web directory of the above
-    $SERVER_ADDR="http://lugdunoncity.org:41976/rest/net/lugdunon/players"; # The REST interface for your server
 
-2) Execute the following commands:
+server_Name='**NewServer**' - The name of your server
+gamelink='**DefaultURL**' - Link to your live server. Replace newserver with your server host name
+outdir="**/var/www/lugstats**" - The file path to your web root - should not need to be changed if you have your webserver at the standard location.
+webdir="**/lugstats/**" - The absolute web directory of the above
+server_addr='**DefaultUrl**' - The REST interface for your server. Replace newserver with your server host name
 
-    cpan
-    install File::Copy
-    install HTTP::Tiny
-    install Data::Dumper
-    install LWP::Simple
-    install JSON
-    install String::Scanf
-    quit
+3) Execute the following commands:
 
-3) Create a crontab like this:
+    cpan -i CPAN
+    cpan -i File::Copy
+    cpan -i HTTP::Tiny
+    cpan -i Data::Dumper
+    cpan -i LWP::Simple
+    cpan -i JSON
+    cpan -i String::Scanf
 
-	*/5 * * * * cd ~/lugstats;./lugstats.pl
+4) Create a crontab like this:
 
-   This will poll every 5 minutes
+    */5 * * * * cd ~/lugstats;./lugstats.pl
+
+This will poll every 5 minutes
