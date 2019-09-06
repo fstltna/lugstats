@@ -15,7 +15,7 @@ Project based here: https://lugdunoncity.org/index.php/forum/lugstats
 
 server_Name='**NewServer**' - The name of your server
 gamelink='**DefaultURL**' - Link to your live server. Replace newserver with your server host name
-outdir="**/var/www/lugstats**" - The file path to your web root - should not need to be changed if you have your webserver at the standard location.
+outdir="**/var/www/html/lugstats**" - The file path to your web root - should not need to be changed if you have your webserver at the standard location.
 webdir="**/lugstats/**" - The absolute web directory of the above
 server_addr='**DefaultUrl**' - The REST interface for your server. Replace newserver with your server host name
 
